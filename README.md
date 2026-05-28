@@ -60,6 +60,24 @@ A alternative would be the use zenity (check with zenity --help).
 As zenity needs a --password parameter it can't be used with sudo directly.
 You have to use a helper script (some hassle I wanted to avoid).
 
+## Gtk4
+
+Getting started with gtk4 is not so hard, most things are like
+they used to be. But the builder file format has changed, at
+first you may decide to just remove the properties the builder
+complains about and in some cases it just works.
+But then some strange isssues arise, e.g. entry
+fields that are not focusable ... and after hours you realize
+there is more to it e.g. the boolean properties no longer work
+with true or false they use numeric value 1 or 0.
+To convert glade gtk3 .ui files use:
+
+<pre>
+gtk4-builder-tool simplify --3to4 BUILDER.ui
+</pre>
+
+Or use the new UI designer...
+
 ## Thoughts
 
 - the compiler is fast

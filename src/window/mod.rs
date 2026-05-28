@@ -356,7 +356,7 @@ impl Window {
         if let Some(selObj) = singleModel.selected_item() {
             let projObj = selObj.dynamic_cast::<BuildProject>().unwrap();
             let build = projObj.buildProj();
-            if let Ok(mut tasks) = build {
+            if let Ok(tasks) = build {
                 {   // important to avoid double borrow for tasks
                     let mut taskRef = self.imp().tasks.borrow_mut();
                     //tasks.splice(0.., taskRef.back().unwrap()); more efficent

@@ -1,45 +1,37 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.40.0 -->
 <interface>
+  <requires lib="gtk" version="4.0"/>
   <template class="buildWin" parent="GtkApplicationWindow">
-    <property name="can-focus">False</property>
     <property name="default-width">640</property>
     <property name="default-height">480</property>
     <child>
       <object class="GtkPaned">
-        <property name="visible">True</property>
-        <property name="can-focus">True</property>
+        <property name="focusable">1</property>
         <property name="orientation">vertical</property>
         <property name="position">200</property>
-        <child>
+        <property name="start-child">
           <object class="GtkBox">
-            <property name="visible">True</property>
-            <property name="can-focus">False</property>
-            <property name="hexpand">True</property>
-            <property name="vexpand">True</property>
+            <property name="hexpand">1</property>
+            <property name="vexpand">1</property>
             <property name="orientation">vertical</property>
             <property name="spacing">4</property>
             <child>
               <object class="GtkScrolledWindow">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="propagate-natural-width">True</property>
-                <property name="hexpand">True</property>
-                <property name="vexpand">True</property>
-                <child>
+                <property name="focusable">1</property>
+                <property name="propagate-natural-width">1</property>
+                <property name="hexpand">1</property>
+                <property name="vexpand">1</property>
+                <property name="child">
                   <object class="GtkColumnView" id="table">
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="hexpand">True</property>
-                    <property name="vexpand">True</property>
+                    <property name="focusable">1</property>
+                    <property name="hexpand">1</property>
+                    <property name="vexpand">1</property>
                   </object>
-                </child>
+                </property>
               </object>
             </child>
             <child>
               <object class="GtkBox">
-                <property name="visible">True</property>
-                <property name="can-focus">False</property>
                 <property name="spacing">4</property>
                 <child>
                   <placeholder/>
@@ -50,31 +42,28 @@
                 <child>
                   <object class="GtkButton" id="build">
                     <property name="label">Apply</property>
-                    <property name="visible">True</property>
-                    <property name="can-focus">True</property>
-                    <property name="receives-default">True</property>
+                    <property name="focusable">1</property>
+                    <property name="receives-default">1</property>
                   </object>
                 </child>
               </object>
             </child>
           </object>
-        </child>
-        <child>
+        </property>
+        <property name="end-child">
           <object class="GtkScrolledWindow">
-            <property name="visible">True</property>
-            <property name="can-focus">True</property>
-            <property name="propagate-natural-width">True</property>
-            <child>
+            <property name="focusable">1</property>
+            <property name="propagate-natural-width">1</property>
+            <property name="child">
               <object class="GtkTextView" id="text">
-                <property name="visible">True</property>
-                <property name="can-focus">True</property>
-                <property name="hexpand">True</property>
-                <property name="vexpand">True</property>
-                <property name="monospace">True</property>
+                <property name="focusable">1</property>
+                <property name="hexpand">1</property>
+                <property name="vexpand">1</property>
+                <property name="monospace">1</property>
               </object>
-            </child>
+            </property>
           </object>
-        </child>
+        </property>
       </object>
     </child>
   </template>
