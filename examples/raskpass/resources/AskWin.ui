@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk" version="4.0"/>
+  <template class="askWin" parent="GtkApplicationWindow">
+    <property name="title" translatable="1">Askpass</property>
+    <property name="default-width">300</property>
+    <child>
+      <object class="GtkBox">
+        <property name="hexpand">1</property>
+        <property name="vexpand">1</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">4</property>
+        <child>
+          <object class="GtkLabel" id="label">
+            <property name="label">Password</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkPasswordEntry" id="pass">
+            <property name="focusable">1</property>
+            <property name="show-peek-icon">1</property>
+            <property name="placeholder-text" translatable="1">Password</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkCenterBox">
+            <property name="visible">1</property>
+            <property name="end-widget">
+              <object class="GtkBox">
+                <property name="spacing">4</property>
+                <child>
+                  <object class="GtkButton" id="ok">
+                    <property name="label">Apply</property>
+                    <property name="focusable">1</property>
+                    <property name="receives-default">1</property>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="cancel">
+                    <property name="label">Cancel</property>
+                    <property name="focusable">1</property>
+                  </object>
+                </child>
+              </object>
+            </property>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

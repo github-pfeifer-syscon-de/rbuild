@@ -1,0 +1,4 @@
+/target
+/src/meson.build
+/meson.build
+/src/resources/meson.build
