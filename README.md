@@ -13,6 +13,24 @@ The config is placed in ~/.config/pyBuild.conf you probably
 want to adapt this to your local environment 
 (some example will be created on the first start). 
 
+## Buidling 
+
+Rust supports two environment maintenance options:
+- by distro install rust/rustc (I did not try/use it but it may work as well)
+- by rust itself rustup, preferred for development  
+
+Requirements for Debian e.g. (install as root):
+<pre>
+apt-get install rustup
+apt-get install libgtk-4-dev
+</pre>
+
+To build use: 
+<pre>
+cd rbuild
+cargo build
+</pre>
+
 ## Examples
 
 raskpass ist not exactly a example more a utility to ask for the sudo password.
@@ -50,3 +68,4 @@ You have to use a helper script (some hassle I wanted to avoid).
 - the linter makes helpful suggestions, especially if you just started 
 - JetBrains offers a convenient option to work with rust 
 - the target directory grows to ~2..4Gbyte fast, if you use gtk4 (clean with cargo clean)
+- as this uses limited dependencies it also will work with a 2G Ram Raspi (bring some time) 

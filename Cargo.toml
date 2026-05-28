@@ -5,7 +5,7 @@ edition = "2024"
 
 
 [dependencies]
-gtk = { version = "0.11.3", package = "gtk4", features = ["v4_22"] }
+gtk = { version = "0.11.3", package = "gtk4", features = ["v4_18"] }
 glib = "0.22.7"
 chrono = "0.4.44"
 
