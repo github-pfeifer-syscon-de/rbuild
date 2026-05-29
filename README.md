@@ -16,7 +16,7 @@ want to adapt this to your local environment
 ## Buidling 
 
 Rust supports two environment maintenance options:
-- by distro install rust/rustc (I did not try/use it but it may work as well)
+- by distro install rust/rustc (does not work as for debian the rustc version ist not up to some ofthe package requirements, but maybe for a diffrent distro/version)
 - by rust itself rustup, preferred for development  
 
 Requirements for Debian e.g. (install as root):
