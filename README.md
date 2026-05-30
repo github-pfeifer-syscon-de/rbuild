@@ -78,6 +78,13 @@ gtk4-builder-tool simplify --3to4 BUILDER.ui
 
 Or use the new UI designer...
 
+## Windows
+
+This seems difficult:
+- The windows defender identifies the msys2 rustup as threat, as it downloads additional binaries
+- After using the "officical" rust installer which adds Visual-studio" the link to binary packages in msys-env is missing
+- Need to create some chimera
+
 ## Thoughts
 
 - the compiler is fast
