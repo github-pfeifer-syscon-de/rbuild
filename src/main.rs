@@ -6,6 +6,9 @@ mod proc_pack;
 mod proc_run;
 mod proc_repo;
 mod proc_inst;
+pub mod build;
+pub mod build_pacm;
+pub mod build_meson;
 
 use gtk::prelude::*;
 use gtk::{Application, gio, glib};

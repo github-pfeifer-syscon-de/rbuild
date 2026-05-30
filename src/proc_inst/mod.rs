@@ -3,8 +3,8 @@ mod imp;
 
 use crate::proc::BuildProcessTrait;
 use crate::proc_run::BuildRunner;
-use glib::property::{PropertySet};
 pub(crate) use imp::BuildProcessInst;
+use glib::property::{PropertySet};
 use std::boxed::Box;
 use std::cell::RefCell;
 use std::ffi::{OsStr, OsString};
@@ -44,7 +44,11 @@ impl BuildProcessTrait for BuildProcessInst {
         let build = self.buildDir.borrow();
         let buildDir = Path::new(build.as_os_str());
         let cmd = self.cmd.clone();
+        println!("Command \"{}\" dir \"{}\"", cmd.display(), buildDir.display());
         let args = self.args.borrow().to_vec();
+        //for arg in args.clone() {
+        //    println!("   arg \"{}\"", arg.display());
+        //}
         let mut command = Command::new(cmd);
         command.args(args)
             .stderr(Stdio::piped())
@@ -53,6 +57,7 @@ impl BuildProcessTrait for BuildProcessInst {
         let refAskpass = self.askpass.borrow();
         let askpass = refAskpass.as_os_str();
         if !askpass.is_empty() {
+            //println!("   setting {}=\"{}\"", BuildProject::SUDO_ASKPASS, askpass.display());
             command.env(BuildProject::SUDO_ASKPASS, askpass.to_os_string());
         }
         let result = command.spawn();
@@ -60,7 +65,7 @@ impl BuildProcessTrait for BuildProcessInst {
             return Ok(BuildRunner::new(child));
         }
         else {
-            let msg = format!("Error  {}running {}"
+            let msg = format!("Error {} running {}"
                               , result.unwrap_err(), self.cmd.display());
             return Err(msg);
         }
@@ -68,5 +73,7 @@ impl BuildProcessTrait for BuildProcessInst {
     fn cmd(&self) -> OsString {
         return self.cmd.clone();
     }
+    
+    
 }
 

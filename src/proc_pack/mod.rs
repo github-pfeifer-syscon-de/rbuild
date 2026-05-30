@@ -1,7 +1,7 @@
 #![allow(non_snake_case)]
 mod imp;
 
-use crate::proc::BuildProcessTrait;
+use crate::proc::{findPackageFiles, BuildProcessTrait};
 use crate::proc_run::BuildRunner;
 pub(crate) use imp::BuildProcess;
 use glib::property::PropertySet;
@@ -11,6 +11,7 @@ use std::ffi::{OsStr, OsString};
 use std::path::Path;
 use std::process::{Command, Stdio};
 use std::format;
+use std::fs::DirEntry;
 
 impl BuildProcessTrait for BuildProcess {
     fn new(scmd:&str) -> Box<impl BuildProcessTrait> {
@@ -41,21 +42,20 @@ impl BuildProcessTrait for BuildProcess {
         let buildDir = Path::new(build.as_os_str());
         let args = self.args.borrow().to_vec();
         let cmd = self.cmd.clone();
-        // as a preparation step remove any leftover package files  
-        let paths = std::fs::read_dir(buildDir).unwrap();
-        for buildEntry in paths {
-            if buildEntry.is_ok() {
-                let path = buildEntry
-                    .expect("The path was not valid");
-                let fileName = path.file_name();
-                let fileString = fileName.into_string().unwrap();
-                if fileString.ends_with(".zst")
-                    && path.file_type().unwrap().is_file() {
-                    println!("removing: {}", fileString);
-                    let pathPath = path.path();
-                    std::fs::remove_file(pathPath.as_path()).unwrap();
-                }
+        println!("Command \"{}\" dir \"{}\"", cmd.display(), buildDir.display());
+        let mut argsVec = Vec::new();
+        // as a preparation step remove any leftover package files
+        if let Err(res) = findPackageFiles(buildDir, &mut argsVec, |path: &DirEntry, argVec:&mut Vec<()>| -> Result<(),String> {
+            let fileName = path.file_name();
+            let fileString = fileName.to_str().unwrap();
+            println!("removing: {}", fileString);
+            let pathPath = path.path();
+            if let Err(err) = std::fs::remove_file(pathPath.as_path()) {
+                return Err(format!("Error {} removing {} form build dir", err, fileName.display()));
             }
+            Ok(())
+        }) {
+            return Err(res);
         }
         let result = Command::new(cmd)
             .args(args)

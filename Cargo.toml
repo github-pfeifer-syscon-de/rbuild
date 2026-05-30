@@ -14,4 +14,3 @@ glib-build-tools = "0.22"
 
 [[example]]
 name = "raskpass"
-build = "examples/raskpass/build.rs"

@@ -315,7 +315,7 @@ impl Window {
         let mut tasks = self.imp().tasks.borrow_mut();
         if let Some(qtask) = tasks.pop_front() {
             let task= qtask.deref();
-            println!("Task {} starting", task.cmd().display());
+            //println!("Task {} starting", task.cmd().display());
             let runner = task.run();
             if let Ok(running) = runner {
                 let build = self.imp().build.get();
@@ -346,6 +346,7 @@ impl Window {
                 }));
             }
             else if let Err(msg) = runner {
+                println!("Error {}", msg);
                 self.showErr(&msg, ShowEnum::Error);
             }
         }
@@ -367,6 +368,7 @@ impl Window {
                 self.runTask();
             }
             else if let Err(err) = build {
+                println!("Error {} starting", err);
                 self.showErr(&err, ShowEnum::Error);
             }
         }

@@ -1,7 +1,7 @@
 #![allow(non_snake_case)]
 mod imp;
 
-use crate::proc::BuildProcessTrait;
+use crate::proc::{findPackageFiles, BuildProcessTrait};
 use crate::proc_run::BuildRunner;
 pub(crate) use imp::BuildProcessRepo;
 use glib::property::PropertySet;
@@ -9,7 +9,7 @@ use std::boxed::Box;
 use std::cell::RefCell;
 use std::ffi::{OsStr, OsString};
 use std::format;
-use std::fs::{copy, remove_file};
+use std::fs::{copy, remove_file, DirEntry};
 use std::path::{Path, PathBuf};
 use std::process::{Command, Stdio};
 
@@ -49,33 +49,28 @@ impl BuildProcessTrait for BuildProcessRepo {
             .expect("The parent of repo-db was not found!");
         let mut argsVec = Vec::new();
         argsVec.push(repo.to_os_string());
-        let paths = std::fs::read_dir(buildDir).unwrap();
-        for buildEntry in paths {
-            if buildEntry.is_ok() {
-                let path = buildEntry.unwrap();
-                let pathPath = path.path();
-                let fileName = path.file_name();
-                let fileString = fileName.to_str().unwrap();
-                let fileType = path.file_type().unwrap();
-                if fileString.ends_with(".zst")
-                    && fileType.is_file() {
-                    let mut destPath = PathBuf::new();
-                    destPath.push(repoPath.as_os_str());
-                    destPath.push(fileName.as_os_str());
-                    let copyRes = copy(&pathPath, destPath.as_path());  // not as comfortable as python, rename refuses to move between filesystems
-                    if let Err(err ) = copyRes {
-                        let msg = format!("Error {} copying package file: {}", err, fileString);
-                        return Err(msg);
-                    }
-                    else {
-                        let _removeErr = remove_file(&pathPath);
-                        println!("adding: {}", fileString);
-                        argsVec.push(destPath.into_os_string());
-                    }
-                }
+        let res = findPackageFiles(buildDir, &mut argsVec, |path: &DirEntry,  argsVec:&mut Vec<OsString>| -> Result<(),String> {
+            let pathPath = path.path();
+            let fileName = path.file_name();
+            let fileString = fileName.to_str().unwrap();
+            let mut destPath = PathBuf::new();
+            destPath.push(repoPath.as_os_str());
+            destPath.push(fileName.as_os_str());
+            if let Err(err) = copy(&pathPath, destPath.as_path()) { // since this crosses most likely a filesystems border
+                let msg = format!("Error {} copying package file: {},", err, fileString);
+                return Err(msg);
+            } else {
+                let _removeErr = remove_file(&pathPath);
+                println!("adding: {}", fileString);
+                argsVec.push(destPath.into_os_string());
             }
+            return Ok(());
+        });
+        if let Err(err) = res {
+            return Err(err);
         }
         let cmd = self.cmd.clone();
+        println!("Command \"{}\" dir \"{}\"", cmd.display(), buildDir.display());
         let result = Command::new(cmd)
             .args(argsVec)
             .stderr(Stdio::piped())

@@ -1,19 +1,21 @@
 #![allow(non_snake_case)]
 mod imp;
 
-use crate::proc::BuildProcessTrait;
-use crate::{proc_inst, proc_pack, proc_repo};
 use chrono::{DateTime, Local};
 use glib::{BoxedAnyObject, Object};
 use gtk::glib;
-use gtk::prelude::{ObjectExt};
+use gtk::prelude::ObjectExt;
 use std::cell::Ref;
 use std::ffi::{OsStr, OsString};
-use std::format;
 use std::fs::{read_to_string, DirEntry};
-use std::ops::{Add};
-use std::os::unix::fs;
+use std::ops::Add;
 use std::path::{Path, PathBuf};
+use std::{env, format};
+
+use crate::build::BuildModelTrait;
+use crate::build_meson::BuildModelMeson;
+use crate::build_pacm::BuildModelPacman;
+use crate::proc::BuildProcessTrait;
 
 // ANCHOR: glib_wrapper_and_new
 glib::wrapper! {
@@ -26,6 +28,8 @@ impl BuildProject {
     const BUILD_DIR:&'static str = "build";
     const SRC_DIR:&'static str = "src";
     pub const SUDO_ASKPASS:&'static str = "SUDO_ASKPASS";
+    pub const MINGW_PREFIX:&'static str = "MINGW_PREFIX";
+
 
     pub fn changeDateOf(&self, subDir: &str) -> String {
         let boxed = self.path();
@@ -134,70 +138,14 @@ impl BuildProject {
     }
     pub fn buildProj(&self) -> Result<Vec<Box<dyn BuildProcessTrait>>,String>  {
         println!("Started building {}", self.name());
-        let csrcPkgBuild = self.getCsrcPkgbuild();
-        if !csrcPkgBuild.is_file() {
-            let err = format!("The pkgbuild script {} was not found", csrcPkgBuild.as_os_str().display());
-            return Err(err);
+        let buildModel:Box<dyn BuildModelTrait>;
+        if env::consts::OS == "windows" {
+            buildModel = BuildModelMeson::new("meson");
         }
-        let buildDir = self.getBuildDir().clone();
-        if !buildDir.is_dir() {
-            let err = format!("The build dir {} was not found or is not a directory", buildDir.as_os_str().display());
-            return Err(err);
+        else {
+            buildModel = BuildModelPacman::new("pacman");
         }
-        let buildPkgbuild: Box<Path> = self.getBuildPkgbuild();
-        if !buildPkgbuild.is_symlink() {
-            let linkErr = fs::symlink(csrcPkgBuild, buildPkgbuild.as_ref());
-            if linkErr.is_err() {
-                let err = format!("The link {} was not created", buildPkgbuild.as_os_str().display());
-                return Err(err);
-            }
-        }
-        let boxRepo = self.repo();
-        let refRepo:Ref<OsString> = boxRepo.borrow();
-        let repo:OsString = refRepo.to_os_string();
-        let mut tasks : Vec<Box<dyn BuildProcessTrait>> = Vec::new();
-        let proc_makepkg = proc_pack::BuildProcess::new("makepkg");
-        proc_makepkg.setBuildDir(buildDir.as_os_str());
-        proc_makepkg.addArg(OsStr::new("--syncdeps"));
-        proc_makepkg.addArg(OsStr::new("--force"));
-        tasks.push(proc_makepkg);
-        let proc_repo_add = proc_repo::BuildProcessRepo::new("repo-add");
-        proc_repo_add.setBuildDir(buildDir.as_os_str());
-        proc_repo_add.setRepo(repo.as_os_str());
-        tasks.push(proc_repo_add);
-        let proc_install = proc_inst::BuildProcessInst::new("sudo");
-        let boxAskpass = self.askpass();
-        let refAskpass: Ref<OsString> = boxAskpass.borrow();
-        let askPass= OsString::from(refAskpass.as_os_str());
-        proc_install.setBuildDir(buildDir.as_os_str());
-        if let None = std::env::var_os(BuildProject::SUDO_ASKPASS) {
-            if askPass.is_empty() {
-                println!("A existing environment var SUDO_ASKPASS was not found, and the setting ~/.config/pyBuild.conf Askpass=path_askpass_executable was missing as well, this might work if the user can use sudo directly (not recommended)");
-            }
-            else {
-                proc_install.setAskpass(askPass.as_os_str());   // use config if not preconfigured
-                proc_install.addArg(OsStr::new("--askpass"));
-            }
-        }
-        else {  // if env exists use it
-            proc_install.addArg(OsStr::new("--askpass"));
-        }
-        proc_install.addArg(OsStr::new("pacman"));
-        proc_install.addArg(OsStr::new("--noconfirm"));
-        proc_install.addArg(OsStr::new("--sync"));
-        proc_install.addArg(OsStr::new("--refresh"));
-        let mut packName =
-            if let Some(packname) = self.readPackageName() {
-                packname
-            }
-            else {
-                OsString::from(self.name().as_str())
-            };
-        proc_install.addArg(packName.as_os_str());
-        packName.push("-debug");
-        proc_install.addArg(packName.as_os_str());
-        tasks.push(proc_install);
-        return Ok(tasks);
+        return buildModel.build(&self);
     }
     pub fn new(name: String, path: std::fs::DirEntry, repo: &OsStr, askpass: &OsStr) -> Self {
         let pathBoxed= BoxedAnyObject::new(path);
